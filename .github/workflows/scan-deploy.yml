@@ -1,0 +1,51 @@
+# Scans the market on a schedule, builds the static site and publishes it to GitHub Pages (free).
+# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+name: Scan and deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    # GitHub cron is UTC and often starts 5-20 minutes late.
+    - cron: "30 13 * * 1-5" # before the US open (overnight futures, calendars)
+    - cron: "10 19 * * 1-5" # ~50 min before the close during US summer time (close 20:00 UTC)
+    - cron: "10 20 * * 1-5" # ~50 min before the close during US winter time (close 21:00 UTC)
+    - cron: "30 21 * * 1-5" # after the close: final prices, swing signals
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run scan
+      - run: npm run check
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
