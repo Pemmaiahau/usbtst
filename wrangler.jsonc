@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "usbtst",
+  "compatibility_date": "2026-11-17",
+  // The site is a static export (npm run build writes ./out); no Worker code is needed.
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  }
+}
