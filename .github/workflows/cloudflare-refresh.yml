@@ -1,0 +1,29 @@
+# Triggers a Cloudflare rebuild (which runs the scan) on a schedule.
+# One-time setup:
+#   1. Cloudflare: Workers & Pages -> usbtst -> Settings -> Builds -> Deploy hooks -> create one (branch: main).
+#   2. GitHub: repo Settings -> Secrets and variables -> Actions -> New repository secret
+#      named CLOUDFLARE_DEPLOY_HOOK, value = the hook URL.
+name: Refresh Cloudflare site
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub cron is UTC and often starts 5-20 minutes late.
+    - cron: "30 13 * * 1-5" # before the US open (overnight futures, calendars)
+    - cron: "10 19 * * 1-5" # ~50 min before the close during US summer time (close 20:00 UTC)
+    - cron: "10 20 * * 1-5" # ~50 min before the close during US winter time (close 21:00 UTC)
+    - cron: "30 21 * * 1-5" # after the close: final prices, swing signals
+
+permissions: {}
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the deploy hook
+        env:
+          HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "Secret CLOUDFLARE_DEPLOY_HOOK is not set"; exit 1; fi
+          curl --fail --silent --show-error --retry 3 -X POST "$HOOK" > /dev/null
+          echo "Deploy hook called"

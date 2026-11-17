@@ -32,7 +32,7 @@ Run `npm run scan` again whenever you want fresh data. `npm run universe` refres
 
 1. Put this folder in its own GitHub repository (public; free Pages needs a public repo) and push to `main`.
 2. In the repository: Settings → Pages → Source → **GitHub Actions**.
-3. The workflow in `.github/workflows/scan-deploy.yml` then scans and publishes four times each weekday
+3. The workflow in `.github/workflows/scan-deploy.yml` publishes when you start it by hand (Actions tab → Run workflow).
    (before the open, twice near the close to cover summer/winter time, and after the close).
    You can also start it by hand from the Actions tab ("Run workflow").
 

@@ -1,17 +1,10 @@
-# Scans the market on a schedule, builds the static site and publishes it to GitHub Pages (free).
+# Manual GitHub Pages deploy (optional; the live site is on Cloudflare). Scans the market, builds the static site and publishes it to GitHub Pages (free).
 # One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
 name: Scan and deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-  schedule:
-    # GitHub cron is UTC and often starts 5-20 minutes late.
-    - cron: "30 13 * * 1-5" # before the US open (overnight futures, calendars)
-    - cron: "10 19 * * 1-5" # ~50 min before the close during US summer time (close 20:00 UTC)
-    - cron: "10 20 * * 1-5" # ~50 min before the close during US winter time (close 21:00 UTC)
-    - cron: "30 21 * * 1-5" # after the close: final prices, swing signals
+  # Manual only: the scheduled refresh runs through Cloudflare (cloudflare-refresh.yml).
 
 permissions:
   contents: read
